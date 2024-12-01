@@ -3,6 +3,86 @@
  <head>
    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
    <script src="https://cdn.jsdelivr.net/npm/aframe-physics-system@4.0.1/dist/aframe-physics-system.min.js"></script>
+   <style>
+    #chatbot-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1000;
+      display: none;
+    }
+
+    #chatbot-button {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1001;
+      background-color: #4B0631;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+    }
+
+    #chatbot-button:hover {
+      background-color: #6D0847;
+      transform: scale(1.1);
+    }
+
+    #chatbot-panel {
+      width: 300px;
+      height: 500px;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+    }
+
+    #chatbot-header {
+      background-color: #4B0631;
+      color: white;
+      padding: 10px;
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    #chatbot-messages {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 10px;
+    }
+
+    #chatbot-input-container {
+      display: flex;
+      padding: 10px;
+      border-top: 1px solid #eee;
+    }
+
+    #chatbot-input {
+      flex-grow: 1;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      margin-right: 10px;
+    }
+
+    #chatbot-send {
+      background-color: #4B0631;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 8px 15px;
+      cursor: pointer;
+    }
+  </style>
    <script>
      AFRAME.registerComponent('screen-handler', {
        init: function () {
@@ -45,21 +125,17 @@
            }
          ];
 
-
          let currentOutfit = 0;
          const el = this.el;
          const screenText = el.querySelector('#screenText');
          const subtitleText = el.querySelector('#subtitleText');
 
-
          el.addEventListener('click', function () {
            currentOutfit = (currentOutfit + 1) % outfits.length;
            const outfit = outfits[currentOutfit];
 
-
            el.setAttribute('color', outfit.color);
            el.setAttribute('material', `emissive: ${outfit.emissive}; emissiveIntensity: 0.6`);
-
 
            screenText.setAttribute('text', {
              value: outfit.title,
@@ -68,7 +144,6 @@
              width: 4,
              wrapCount: 20
            });
-
 
            subtitleText.setAttribute('text', {
              value: outfit.subtitle,
@@ -80,8 +155,6 @@
          });
        }
      });
-
-
 
      AFRAME.registerComponent('boundary-enforcement', {
        schema: {
@@ -95,76 +168,162 @@
        tick: function () {
          const position = this.el.getAttribute('position');
 
-
          position.x = Math.max(this.data.minX, Math.min(this.data.maxX, position.x));
          position.y = Math.max(this.data.minY, Math.min(this.data.maxY, position.y));
          position.z = Math.max(this.data.minZ, Math.min(this.data.maxZ, position.z));
 
-
          this.el.setAttribute('position', position);
        }
+     });
+
+     document.addEventListener('DOMContentLoaded', function() {
+       const chatbotButton = document.getElementById('chatbot-button');
+       const chatbotContainer = document.getElementById('chatbot-container');
+       const chatbotClose = document.getElementById('chatbot-close');
+       const chatbotMessages = document.getElementById('chatbot-messages');
+       const chatbotInput = document.getElementById('chatbot-input');
+       const chatbotSend = document.getElementById('chatbot-send');
+       const apiKeyInput = document.createElement('input');
+       const testApiKeyButton = document.createElement('button');
+
+       apiKeyInput.type = 'password';
+       apiKeyInput.placeholder = 'Enter your GROQ API key';
+       testApiKeyButton.textContent = 'Test API Key';
+
+       chatbotContainer.prepend(apiKeyInput, testApiKeyButton);
+
+       chatbotButton.addEventListener('click', function() {
+         chatbotContainer.style.display = 
+           chatbotContainer.style.display === 'none' ? 'block' : 'none';
+       });
+
+       chatbotClose.addEventListener('click', function() {
+         chatbotContainer.style.display = 'none';
+       });
+
+       chatbotSend.addEventListener('click', sendMessage);
+       chatbotInput.addEventListener('keypress', function(e) {
+         if (e.key === 'Enter') sendMessage();
+       });
+
+       async function sendMessage() {
+         const apiKey = apiKeyInput.value.trim();
+         const messageText = chatbotInput.value.trim();
+
+         if (!apiKey || !messageText) {
+           alert('Please enter your API key and a message.');
+           return;
+         }
+
+         const userMessageEl = document.createElement('div');
+         userMessageEl.textContent = `You: ${messageText}`;
+         chatbotMessages.appendChild(userMessageEl);
+
+         chatbotInput.value = '';
+         chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+
+         const botMessageEl = document.createElement('div');
+         botMessageEl.textContent = 'Processing...';
+         chatbotMessages.appendChild(botMessageEl);
+
+         try {
+           const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+             method: 'POST',
+             headers: {
+               'Authorization': `Bearer ${apiKey}`,
+               'Content-Type': 'application/json',
+             },
+             body: JSON.stringify({
+              model: 'llama3-8b-8192', 
+               messages: [
+                 { role: "system", content: "You are a cultural fashion expert living in the year 2100, the user is looking back at 2000's and older ethnic wear. Respond with insights, historical context, and fun facts about traditional attires across the world. Keep responses short, around 1-2 sentences max" },
+                 { role: "user", content: messageText }
+               ]
+             })
+           });
+
+           if (response.ok) {
+             const data = await response.json();
+             const aiMessage = data.choices[0].message.content;
+             botMessageEl.textContent = `AI: ${aiMessage}`;
+           } else {
+             botMessageEl.textContent = 'Error: Unable to process your request.';
+           }
+         } catch (error) {
+           botMessageEl.textContent = 'Error: Something went wrong.';
+         } finally {
+           chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+         }
+       }
+
+       testApiKeyButton.addEventListener('click', async () => {
+         const apiKey = apiKeyInput.value.trim();
+
+         if (!apiKey) {
+           alert('Please enter your API key.');
+           return;
+         }
+
+         try {
+           const response = await fetch('https://api.groq.com/openai/v1/models', {
+             method: 'GET',
+             headers: {
+               'Authorization': `Bearer ${apiKey}`,
+               'Content-Type': 'application/json',
+             }
+           });
+
+           if (response.ok) {
+             alert('API key is valid!');
+           } else {
+             alert('Invalid API key.');
+           }
+         } catch (error) {
+           alert('Error testing API key.');
+         }
+       });
      });
    </script>
  </head>
  <body>
    <a-scene physics="debug: false" background="color: #000" fog="type: linear; color: #000; near: 0; far: 20">
-    
-
      <a-plane position="0 0 0" rotation="-90 0 0" width="20" height="20" color="#111" static-body></a-plane>
      <a-plane position="0 8 0" rotation="90 0 0" width="20" height="20" color="#111" static-body></a-plane>
-    
      <a-plane position="-10 4 0" rotation="0 90 0" width="20" height="8" color="#222" static-body></a-plane>
      <a-plane position="10 4 0" rotation="0 -90 0" width="20" height="8" color="#222" static-body></a-plane>
-    
      <a-plane position="0 4 10" rotation="0 180 0" width="20" height="8" color="#222" static-body></a-plane>
      <a-plane position="0 4 -10" rotation="0 0 0" width="20" height="8" color="#222" static-body></a-plane>
-
-
-  
-     <a-box
-       position="0 4 0"
-       width="20"
-       height="8"
-       depth="20"
-       static-body
-       visible="false">
-     </a-box>
-
-
+     <a-box position="0 4 0" width="20" height="8" depth="20" static-body visible="false"></a-box>
      <a-plane position="0 4 -9.5" rotation="0 0 0" width="6" height="7" color="#4B0631">
-       <a-entity
-         position="0 -1 0.1"
-         text="value: → TURN AROUND\nto discover how you'd look\nin different cultural clothing...; color: white; align: center; width: 4; wrapCount: 20; font: monospace">
-       </a-entity>
-       <a-entity
-         position="0 -2 0.1"
-         text="value: Use mouse to look around and WASD to move; color: #aaa; align: center; width: 3; wrapCount: 25">
-       </a-entity>
+       <a-entity position="0 -1 0.1" text="value: → TURN AROUND\nto discover how you'd look\nin different cultural clothing...; color: white; align: center; width: 4; wrapCount: 20; font: monospace"></a-entity>
+       <a-entity position="0 -2 0.1" text="value: Use mouse to look around and WASD to move; color: #aaa; align: center; width: 3; wrapCount: 25"></a-entity>
      </a-plane>
-
-
      <a-entity position="0 4 9.5">
        <a-plane class="clickable" screen-handler rotation="0 180 0" width="5" height="7" color="#4B0631" material="emissive: red; emissiveIntensity: 0.6">
          <a-entity id="screenText" position="0 2.5 0.1" text="value: WELCOME TO CULTURAL JOURNEY; color: white; align: center; width: 4; wrapCount: 20"></a-entity>
          <a-entity id="subtitleText" position="0 2 0.1" text="value: Click to Begin Your Fashion Adventure; color: white; align: center; width: 3; wrapCount: 25"></a-entity>
        </a-plane>
      </a-entity>
-
      <a-entity gltf-model="url(model.gltf)" position="0 3 -3" scale="2 2 2"></a-entity>
-
-
      <a-entity position="0 1.6 -6" rotation="0 0 0">
-       <a-entity
-         camera
-         look-controls
-         wasd-controls="acceleration: 100"
-         boundary-enforcement>
+       <a-entity camera look-controls wasd-controls="acceleration: 100" boundary-enforcement>
          <a-entity cursor="fuse: false" position="0 0 -1" geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03" material="color: white; shader: flat" raycaster="objects: .clickable"></a-entity>
        </a-entity>
      </a-entity>
-
      <a-light type="ambient" intensity="0.3"></a-light>
      <a-light type="spot" position="0 5 0" intensity="1" angle="60" color="#fff"></a-light>
    </a-scene>
+   <button id="chatbot-button">💬</button>
+   <div id="chatbot-container">
+     <div id="chatbot-panel">
+       <div id="chatbot-header">Cultural Journey Assistant<button id="chatbot-close" style="background: none; border: none; color: white; font-size: 20px;">×</button></div>
+       <div id="chatbot-messages"></div>
+       <div id="chatbot-input-container">
+         <input type="text" id="chatbot-input" placeholder="Ask about cultural fashion...">
+         <button id="chatbot-send">Send</button>
+       </div>
+     </div>
+   </div>
  </body>
 </html>
+
