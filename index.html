@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
- <head>
-   <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-   <script src="https://cdn.jsdelivr.net/npm/aframe-physics-system@4.0.1/dist/aframe-physics-system.min.js"></script>
-   <style>
+  <head>
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aframe-physics-system@4.0.1/dist/aframe-physics-system.min.js"></script>
+    <style>
     #chatbot-container {
       position: fixed;
       bottom: 20px;
@@ -83,8 +83,8 @@
       cursor: pointer;
     }
   </style>
-   <script>
-     AFRAME.registerComponent('screen-handler', {
+    <script>
+      AFRAME.registerComponent('screen-handler', {
         init: function () {
           const outfits = [
             {
@@ -134,10 +134,10 @@
               color: "#ff00ff",
               emissive: "purple",
               image: "images/kilt.png" // Image for Kilt
-            }
+            },
             {
               title: "CHINESE CHEONGSAM",
-              subtitle: "A sleek, modern design with a traditional touch,
+              subtitle: "A sleek, modern design with a traditional touch",
               color: "#FF1717",
               emissive: "red",
               image: "images/Hanbok.png" // Image for Cheongsam 
@@ -163,23 +163,23 @@
             emissive: "gold",
             image: "images/Fustanella.png" // Image for Fustanella
           },
-          ];
+          ]
 
-         let currentOutfit = 0;
+          let currentOutfit = 0;
           const el = this.el;
           const screenText = el.querySelector('#screenText');
           const subtitleText = el.querySelector('#subtitleText');
           const screenImage = el.querySelector('#screenImage'); // Image reference
-        
-         // Change color and emissive material
-         el.addEventListener('click', function () {
-           currentOutfit = (currentOutfit + 1) % outfits.length;
-           const outfit = outfits[currentOutfit];
 
-           el.setAttribute('color', outfit.color);
-           el.setAttribute('material', `emissive: ${outfit.emissive}; emissiveIntensity: 0.6`);
+          el.addEventListener('click', function () {
+            currentOutfit = (currentOutfit + 1) % outfits.length;
+            const outfit = outfits[currentOutfit];
 
-           // Update the text on the screen
+            // Change color and emissive material
+            el.setAttribute('color', outfit.color);
+            el.setAttribute('material', `emissive: ${outfit.emissive}; emissiveIntensity: 0.6`);
+
+            // Update the text on the screen
             screenText.setAttribute('text', {
               value: outfit.title,
               color: 'white',
@@ -195,49 +195,50 @@
               width: 3,
               wrapCount: 25
             });
-          // Update the image on the screen
+
+            // Update the image on the screen
             screenImage.setAttribute('src', outfit.image); // Change image source here
-         });
-       }
-     });
+          });
+        }
+      });
 
-     AFRAME.registerComponent('boundary-enforcement', {
-       schema: {
-         minX: { type: 'number', default: -9.5 },
-         maxX: { type: 'number', default: 9.5 },
-         minZ: { type: 'number', default: -9.5 },
-         maxZ: { type: 'number', default: 9.5 },
-         minY: { type: 'number', default: 0 },
-         maxY: { type: 'number', default: 8 }
-       },
-       tick: function () {
-         const position = this.el.getAttribute('position');
+      AFRAME.registerComponent('boundary-enforcement', {
+        schema: {
+          minX: { type: 'number', default: -9.5 },
+          maxX: { type: 'number', default: 9.5 },
+          minZ: { type: 'number', default: -9.5 },
+          maxZ: { type: 'number', default: 9.5 },
+          minY: { type: 'number', default: 0 },
+          maxY: { type: 'number', default: 8 }
+        },
+        tick: function () {
+          const position = this.el.getAttribute('position');
 
-         position.x = Math.max(this.data.minX, Math.min(this.data.maxX, position.x));
-         position.y = Math.max(this.data.minY, Math.min(this.data.maxY, position.y));
-         position.z = Math.max(this.data.minZ, Math.min(this.data.maxZ, position.z));
+          position.x = Math.max(this.data.minX, Math.min(this.data.maxX, position.x));
+          position.y = Math.max(this.data.minY, Math.min(this.data.maxY, position.y));
+          position.z = Math.max(this.data.minZ, Math.min(this.data.maxZ, position.z));
 
-         this.el.setAttribute('position', position);
-       }
-     });
-
+          this.el.setAttribute('position', position);
+        }
+      });
+      
      document.addEventListener('DOMContentLoaded', function() {
-       const chatbotButton = document.getElementById('chatbot-button');
-       const chatbotContainer = document.getElementById('chatbot-container');
-       const chatbotClose = document.getElementById('chatbot-close');
-       const chatbotMessages = document.getElementById('chatbot-messages');
-       const chatbotInput = document.getElementById('chatbot-input');
-       const chatbotSend = document.getElementById('chatbot-send');
-       const apiKeyInput = document.createElement('input');
-       const testApiKeyButton = document.createElement('button');
+        const chatbotButton = document.getElementById('chatbot-button');
+        const chatbotContainer = document.getElementById('chatbot-container');
+        const chatbotClose = document.getElementById('chatbot-close');
+        const chatbotMessages = document.getElementById('chatbot-messages');
+        const chatbotInput = document.getElementById('chatbot-input');
+        const chatbotSend = document.getElementById('chatbot-send');
+        const apiKeyInput = document.createElement('input');
+        const testApiKeyButton = document.createElement('button');
 
-       apiKeyInput.type = 'password';
-       apiKeyInput.placeholder = 'Enter your GROQ API key';
-       testApiKeyButton.textContent = 'Test API Key';
-
-       chatbotContainer.prepend(apiKeyInput, testApiKeyButton);
-
-       chatbotButton.addEventListener('click', function() {
+        apiKeyInput.type = 'password';
+        apiKeyInput.placeholder = 'Enter your GROQ API key';
+        testApiKeyButton.textContent = 'Test API Key';
+      
+        chatbotContainer.prepend(apiKeyInput, testApiKeyButton);
+      
+        chatbotButton.addEventListener('click', function() {
          chatbotContainer.style.display = 
            chatbotContainer.style.display === 'none' ? 'block' : 'none';
        });
@@ -328,51 +329,48 @@
          }
        });
      });
-   </script>
- </head>
- <body>
-   <a-scene physics="debug: false" background="color: #000" fog="type: linear; color: #000; near: 0; far: 20">
-     <a-plane position="0 0 0" rotation="-90 0 0" width="20" height="20" color="#111" static-body></a-plane>
-     <a-plane position="0 8 0" rotation="90 0 0" width="20" height="20" color="#111" static-body></a-plane>
-    
-     <a-plane position="-10 4 0" rotation="0 90 0" width="20" height="8" color="#222" static-body></a-plane>
-     <a-plane position="10 4 0" rotation="0 -90 0" width="20" height="8" color="#222" static-body></a-plane>
-    
-     <a-plane position="0 4 10" rotation="0 180 0" width="20" height="8" color="#222" static-body></a-plane>
-     <a-plane position="0 4 -10" rotation="0 0 0" width="20" height="8" color="#222" static-body></a-plane>
-    
-     <a-box position="0 4 0" width="20" height="8" depth="20" static-body visible="false"></a-box>
-    
-     <a-plane position="0 4 -9.5" rotation="0 0 0" width="6" height="7" color="#4B0631">
-       <a-entity position="0 -1 0.1" text="value: → TURN AROUND\nto discover how you'd look\nin different cultural clothing...; color: white; align: center; width: 4; wrapCount: 20; font: monospace"></a-entity>
-       <a-entity position="0 -2 0.1" text="value: Use mouse to look around and WASD to move; color: #aaa; align: center; width: 3; wrapCount: 25"></a-entity>
-     </a-plane>
-     <a-entity position="0 4 9.5">
-       <a-plane class="clickable" screen-handler rotation="0 180 0" width="5" height="7" color="#4B0631" material="emissive: red; emissiveIntensity: 0.6">
-         <a-entity id="screenText" position="0 2.5 0.1" text="value: WELCOME TO CULTURAL JOURNEY; color: white; align: center; width: 4; wrapCount: 20"></a-entity>
-         <a-entity id="subtitleText" position="0 2 0.1" text="value: Click to Begin Your Fashion Adventure; color: white; align: center; width: 3; wrapCount: 25"></a-entity>
-       </a-plane>
-     </a-entity>
-     <a-entity gltf-model="url(model.gltf)" position="0 3 -3" scale="2 2 2"></a-entity>
-     <a-entity position="0 1.6 -6" rotation="0 0 0">
-       <a-entity camera look-controls wasd-controls="acceleration: 100" boundary-enforcement>
-         <a-entity cursor="fuse: false" position="0 0 -1" geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03" material="color: white; shader: flat" raycaster="objects: .clickable"></a-entity>
-       </a-entity>
-     </a-entity>
-     <a-light type="ambient" intensity="0.3"></a-light>
-     <a-light type="spot" position="0 5 0" intensity="1" angle="60" color="#fff"></a-light>
-   </a-scene>
-   <button id="chatbot-button">💬</button>
-   <div id="chatbot-container">
-     <div id="chatbot-panel">
-       <div id="chatbot-header">Cultural Journey Assistant<button id="chatbot-close" style="background: none; border: none; color: white; font-size: 20px;">×</button></div>
-       <div id="chatbot-messages"></div>
-       <div id="chatbot-input-container">
-         <input type="text" id="chatbot-input" placeholder="Ask about cultural fashion...">
-         <button id="chatbot-send">Send</button>
-       </div>
-     </div>
-   </div>
- </body>
+    </script>
+  </head>
+
+  <body>
+    <a-scene physics="debug: false" background="color: #000" fog="type: linear; color: #000; near: 0; far: 20">
+      
+      <a-plane position="0 1 0" rotation="-90 0 0" width="20" height="20" color="#111" static-body></a-plane>
+      <a-plane position="0 8 0" rotation="90 0 0" width="20" height="20" color="#111" static-body></a-plane>
+      
+      <a-plane position="-10 4 0" rotation="0 90 0" width="20" height="8" color="#222" static-body></a-plane>
+      <a-plane position="10 4 0" rotation="0 -90 0" width="20" height="8" color="#222" static-body></a-plane>
+      
+      <a-plane position="0 4 10" rotation="0 180 0" width="20" height="8" color="#222" static-body></a-plane>
+      <a-plane position="0 4 -10" rotation="0 0 0" width="20" height="8" color="#222" static-body></a-plane>
+
+      <a-box position="0 4 0" width="20" height="8" depth="20" static-body visible="false"></a-box>
+
+      <a-plane position="0 4 -9.5" rotation="0 0 0" width="6" height="7" color="#4B0631">
+        <a-entity position="0 -1 0.1" text="value: → TURN AROUND\nto discover how you'd look\nin different cultural clothing...; color: white; align: center; width: 4; wrapCount: 20; font: monospace"></a-entity>
+        <a-entity position="0 1 0.1" text="value: Use mouse to look around: w,a,s,d to walk. Use mouse to click on the mirror, once you chose your preferred clothing, walk past the mirror and align the model to the clothing  :); color: #aaa; align: center; width: 3; wrapCount: 25"></a-entity>
+      </a-plane>
+
+      <a-entity position="0 4 0">
+        <a-plane class="clickable" screen-handler rotation="0 180 0" width="5" height="7" color="#4B0631"  emissiveIntensity: 0.6">
+          <a-entity id="screenText" position="0 2.5 0.1" text="value: WELCOME TO CULTURAL JOURNEY; color: white; align: center; width: 4; wrapCount: 20"></a-entity>
+          <a-entity id="subtitleText" position="0 2 0.1" text="value: Click to Begin Your Fashion Adventure; color: white; align: center; width: 3; wrapCount: 25"></a-entity>
+          <!-- Image placeholder -->
+          <a-image id="screenImage" position="0 0 0.05" width="4" height="6"></a-image>
+        </a-plane>
+      </a-entity>
+
+      <a-entity gltf-model="url(model.gltf)" position="0 2.5 -4" scale="2 2 2"></a-entity>
+
+      <a-entity position="0 6 -7" rotation="0 0 0">
+        <a-entity camera look-controls wasd-controls="acceleration: 100">
+          <a-entity cursor="fuse: false" position="0 0 -1" geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03" material="color: white; shader: flat" raycaster="objects: .clickable"></a-entity>
+        </a-entity>
+      </a-entity>
+
+      <a-light type="ambient" intensity="0.3"></a-light>
+      <a-light type="spot" position="0 5 0" intensity="1" angle="60" color="#fff"></a-light>
+    </a-scene>
+  </body>
 </html>
 
